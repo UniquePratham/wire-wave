@@ -4,6 +4,7 @@ export default function Document() {
   return (
     <Html lang="en" className="dark">
       <Head>
+        <title>WireWave | New Era Of Chatting</title>
         {/* Meta tags */}
         <meta charSet="utf-8" />
         <meta
