@@ -4,6 +4,7 @@ import { Toaster } from 'sonner';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 import '../styles/globals.css';
 import { initializeAuth } from '../lib/auth';
@@ -52,7 +53,7 @@ const pageTransition = {
   duration: 0.2,
 };
 
-function ChatPulseApp({ Component, pageProps, router }) {
+function WireWaveApp({ Component, pageProps, router }) {
   const [isInitialized, setIsInitialized] = useState(false);
   const { isAuthenticated, user } = useAuthStore();
 
@@ -97,11 +98,14 @@ function ChatPulseApp({ Component, pageProps, router }) {
   // Show loading screen while initializing
   if (!isInitialized) {
     return (
-      <div className="min-h-screen bg-chat-bg flex items-center justify-center">
+      <div className="h-screen bg-chat-bg flex flex-col gap-4 items-center justify-center">
+        <div className="flex justify-center items-center gap-2 flex-col text-center space-y-4">
+           <Image src="/images/only_hd_logo.png" alt="Wire Wave Logo" width={64} height={64} />
+          <h1 className="text-2xl font-brand font-bold text-chat-text">WireWave</h1>
+        </div>
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-chat-accent border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <h1 className="text-2xl font-brand font-bold text-chat-text">ChatPulse</h1>
           <p className="text-chat-text-muted">Initializing...</p>
+          <div className="w-16 h-16 border-4 border-chat-accent border-t-transparent rounded-full animate-spin mx-auto"></div>
         </div>
       </div>
     );
@@ -115,7 +119,7 @@ function ChatPulseApp({ Component, pageProps, router }) {
         enableSystem={false}
         disableTransitionOnChange
       >
-        <div className="min-h-screen bg-chat-bg text-chat-text">
+        <div className="h-screen bg-chat-bg text-chat-text">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={router.route}
@@ -150,4 +154,4 @@ function ChatPulseApp({ Component, pageProps, router }) {
   );
 }
 
-export default ChatPulseApp;
+export default WireWaveApp;

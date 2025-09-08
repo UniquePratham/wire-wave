@@ -78,17 +78,21 @@ export default function LoginPage() {
 
   if (isAuthenticated) {
     return (
-      <div className="min-h-screen bg-chat-bg flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-chat-accent border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-chat-text-muted">Redirecting to chat...</p>
-        </div>
-      </div>
+      <div className="h-screen bg-chat-bg flex flex-col gap-4 items-center justify-center">
+             <div className="flex justify-center items-center gap-2 flex-col text-center space-y-4">
+                <Image src="/images/only_hd_logo.png" alt="Wire Wave Logo" width={64} height={64} />
+               <h1 className="text-2xl font-brand font-bold text-chat-text">WireWave</h1>
+             </div>
+             <div className="text-center space-y-4">
+               <p className="text-chat-text-muted">Redirecting to chat...</p>
+               <div className="w-16 h-16 border-4 border-chat-accent border-t-transparent rounded-full animate-spin mx-auto"></div>
+             </div>
+           </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-chat-bg flex items-center justify-center p-4">
+     <div className="h-screen bg-chat-bg flex items-center justify-center p-4 overflow-hidden">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

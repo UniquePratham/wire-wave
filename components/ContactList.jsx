@@ -207,7 +207,7 @@ export default function ContactList() {
       try {
         const res = await apiClient.put("/profile", form);
         setProfileUser({ ...initial, ...res.data });
-      } catch {}
+      } catch { }
     };
 
     return (
@@ -297,9 +297,8 @@ export default function ContactList() {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: index * 0.03 }}
-        className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-chat-surface transition ${
-          isActive ? "bg-chat-surface-alt border-r-2 border-chat-accent" : ""
-        }`}
+        className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-chat-surface transition ${isActive ? "bg-chat-surface-alt border-r-2 border-chat-accent" : ""
+          }`}
         onClick={() => setActiveContact(contact.email)}
       >
         <div className="relative" onClick={(e) => e.stopPropagation()}>
@@ -427,87 +426,96 @@ export default function ContactList() {
     <div className="h-full flex flex-col relative">
       {/* Top bar */}
       <div className="sticky top-0 z-30 p-3 border-b border-chat-surface-alt bg-chat-panel">
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <Input
-              type="email"
-              placeholder="Email"
-              value={emailQuery}
-              onChange={(e) => setEmailQuery(e.target.value)}
-              className="w-[180px] bg-chat-surface border-chat-surface-alt text-chat-text placeholder-chat-text-muted focus:border-chat-accent"
-            />
-          </div>
-          <Button
-            onClick={handleFindByEmail}
-            className="bg-chat-accent text-white"
-            title="Find user"
-          >
-            <LocateFixed className="w-4 h-4" />
-          </Button>
+        <div className="flex flex-col gap-3">
 
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-chat-text-muted w-4 h-4" />
-            <Input
-              type="text"
-              placeholder="Search conversations..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-chat-surface border-chat-surface-alt text-chat-text placeholder-chat-text-muted focus:border-chat-accent"
-            />
-          </div>
-
-          <Button
-            onClick={openNewChat}
-            className="bg-chat-accent text-white"
-            title="New chat"
-          >
-            <Plus className="w-4 h-4" />
-          </Button>
-
-          {/* Overflow menu with Profile + Logout */}
-          <div className="relative">
+          {/* Row 1: Email lookup */}
+          <div className="flex items-center gap-2">
+            <div className="relative">
+               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-chat-text-muted w-4 h-4" />
+              <Input
+                type="email"
+                placeholder="Search by email..."
+                value={emailQuery}
+                onChange={(e) => setEmailQuery(e.target.value)}
+                className="pl-10 bg-chat-surface border-chat-surface-alt text-chat-text placeholder-chat-text-muted focus:border-chat-accent transition-all duration-200"
+              />
+            </div>
             <Button
-              variant="ghost"
-              className="text-chat-text-muted hover:text-chat-text"
-              onClick={() => setMoreOpen((v) => !v)}
-              aria-haspopup="menu"
-              aria-expanded={moreOpen}
-              title="More"
+              onClick={handleFindByEmail}
+              className="bg-chat-accent text-white hover:opacity-90 transition-all duration-200"
+              title="Find user"
             >
-              <MoreVertical className="w-5 h-5" />
+              <LocateFixed className="w-4 h-4" />
             </Button>
-            {moreOpen && (
-              <div
-                className="absolute right-0 mt-2 w-52 bg-chat-panel border border-chat-surface-alt rounded-md shadow-lg z-40"
-                role="menu"
-                onMouseLeave={() => setMoreOpen(false)}
+          </div>
+
+          {/* Row 2: Conversations search + actions */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-chat-text-muted w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="Search conversations..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-chat-surface border-chat-surface-alt text-chat-text placeholder-chat-text-muted focus:border-chat-accent transition-all duration-200"
+              />
+            </div>
+
+            {/* New chat button */}
+            <Button
+              onClick={openNewChat}
+              className="bg-chat-accent text-white hover:opacity-90 transition-all duration-200"
+              title="New chat"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+
+            {/* Overflow menu */}
+            <div className="relative">
+              <Button
+                variant="ghost"
+                className="text-chat-text-muted hover:text-chat-text"
+                onClick={() => setMoreOpen((v) => !v)}
+                aria-haspopup="menu"
+                aria-expanded={moreOpen}
+                title="More"
               >
-                <button
-                  className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-chat-surface"
-                  onClick={handleOpenOwnProfile}
+                <MoreVertical className="w-5 h-5" />
+              </Button>
+              {moreOpen && (
+                <div
+                  className="absolute right-0 mt-2 w-52 bg-chat-panel border border-chat-surface-alt rounded-md shadow-lg z-40 animate-fade-in"
+                  role="menu"
+                  onMouseLeave={() => setMoreOpen(false)}
                 >
-                  <UserCircle2 className="w-4 h-4" />
-                  Profile
-                </button>
-                <button
-                  className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-chat-surface"
-                  onClick={() => {
-                    setMoreOpen(false);
-                    openNewChat();
-                  }}
-                >
-                  <Plus className="w-4 h-4" />
-                  New chat
-                </button>
-                <button
-                  className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-chat-surface"
-                  onClick={onLogout}
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </button>
-              </div>
-            )}
+                  <button
+                    className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-chat-surface"
+                    onClick={handleOpenOwnProfile}
+                  >
+                    <UserCircle2 className="w-4 h-4" />
+                    Profile
+                  </button>
+                  <button
+                    className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-chat-surface"
+                    onClick={() => {
+                      setMoreOpen(false);
+                      openNewChat();
+                    }}
+                  >
+                    <Plus className="w-4 h-4" />
+                    New chat
+                  </button>
+                  <button
+                    className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-chat-surface"
+                    onClick={onLogout}
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

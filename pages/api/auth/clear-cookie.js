@@ -7,7 +7,7 @@ export default function handler(req, res) {
 
   try {
     // Clear secure, httpOnly cookie
-    const cookie = serialize(process.env.COOKIE_NAME || 'chatpulse_auth', '', {
+    const cookie = serialize(process.env.COOKIE_NAME, '', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',

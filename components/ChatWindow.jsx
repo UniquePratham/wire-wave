@@ -211,7 +211,7 @@ export default function ChatWindow() {
             <Send className="w-12 h-12 text-chat-text-muted" />
           </div>
           <h2 className="text-xl font-medium text-chat-text">
-            Welcome to ChatPulse
+            Welcome to WireWave
           </h2>
           <p className="text-chat-text-muted max-w-md">
             Select a conversation from the sidebar to start messaging, or create
