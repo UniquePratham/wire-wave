@@ -43,19 +43,20 @@ export default function ChatPage() {
           </Button>
         </div>
 
-        <div className="h-full grid grid-cols-1 md:grid-cols-[320px_1fr]">
+        {/* Responsive grid: widen sidebar on larger screens */}
+        <div
+          className="
+          h-full grid grid-cols-1
+          md:grid-cols-[360px_1fr]
+          lg:grid-cols-[400px_1fr]
+          xl:grid-cols-[448px_1fr]
+        "
+        >
           {/* Sidebar (Desktop) */}
           <aside className="hidden md:flex flex-col h-full bg-chat-panel border-r border-chat-surface-alt">
-            <div className="flex-1 min-h-0">
+            {/* Independent scroll region for the sidebar */}
+            <div className="flex-1 min-h-0 overflow-y-auto">
               <ContactList />
-            </div>
-            <div className="p-4 border-t border-chat-surface-alt">
-              <Button
-                onClick={handleLogout}
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-150"
-              >
-                Logout
-              </Button>
             </div>
           </aside>
 
@@ -74,25 +75,23 @@ export default function ChatPage() {
                 animate={{ x: 0 }}
                 exit={{ x: "-100%" }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className="md:hidden fixed left-0 top-0 h-full w-80 z-50 flex flex-col bg-chat-panel border-r border-chat-surface-alt"
+                className="
+                  md:hidden fixed left-0 top-0 h-full z-50 flex flex-col
+                  bg-chat-panel border-r border-chat-surface-alt
+                  w-[85vw] max-w-sm
+                "
               >
-                <div className="flex-1 min-h-0">
+                {/* Independent scroll region for mobile sidebar */}
+                <div className="flex-1 min-h-0 overflow-y-auto">
                   <ContactList />
                 </div>
-                <div className="p-4 border-t border-chat-surface-alt">
-                  <Button
-                    onClick={handleLogout}
-                    className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-150"
-                  >
-                    Logout
-                  </Button>
-                </div>
+                {/* Removed bottom Logout button; use the three-dot menu in ContactList */}
               </motion.aside>
             </>
           )}
 
-          {/* Main Chat */}
-          <main className="h-full min-h-0">
+          {/* Main Chat (independent scroll) */}
+          <main className="h-full min-h-0 overflow-hidden">
             <ChatWindow />
           </main>
         </div>

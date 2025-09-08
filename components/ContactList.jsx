@@ -10,6 +10,9 @@ import {
   Trash2,
   BellOff,
   LocateFixed,
+  LogOut,
+  X,
+  UserCircle2,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "../lib/axios";
@@ -18,6 +21,8 @@ import { useUIStore, useAuthStore } from "../lib/store";
 import { Input } from "../src/components/ui/input";
 import { Button } from "../src/components/ui/button";
 import { Badge } from "../src/components/ui/badge";
+import { logoutUser } from "../lib/auth";
+import { createProfile, updateProfile } from "../lib/profile";
 
 export default function ContactList() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,8 +30,18 @@ export default function ContactList() {
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
   const [newChatEmail, setNewChatEmail] = useState("");
   const [profileUser, setProfileUser] = useState(null);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false); // NEW: open editor
+  const [profileForm, setProfileForm] = useState({
+    // NEW: editor state
+    name: "",
+    about: "",
+    avatar_url: "",
+  });
+  const [saving, setSaving] = useState(false);
 
-  const { activeContactEmail, setActiveContact } = useUIStore();
+  const { activeContactEmail, setActiveContact, setMobileMenuOpen } =
+    useUIStore();
   const { user } = useAuthStore();
 
   const {
@@ -64,7 +79,6 @@ export default function ContactList() {
         lastMessageTime: null,
         unreadCount: 0,
       };
-
       if (
         !cur.lastMessageTime ||
         new Date(m.sent_at) > new Date(cur.lastMessageTime)
@@ -73,7 +87,6 @@ export default function ContactList() {
         cur.lastMessageTime = m.sent_at;
       }
       if (m.receiver_email === user.email && !m.read) cur.unreadCount += 1;
-
       map.set(other, cur);
     }
 
@@ -118,6 +131,7 @@ export default function ContactList() {
     if (!email || !email.includes("@")) return;
     setActiveContact(email);
     setIsNewChatOpen(false);
+    setMobileMenuOpen(false);
   };
 
   const openProfile = async (email) => {
@@ -138,6 +152,50 @@ export default function ContactList() {
     }
   };
 
+  const onLogout = async () => {
+    setMoreOpen(false);
+    await logoutUser();
+  };
+
+  // NEW: open own profile editor
+  const handleOpenOwnProfile = async () => {
+    setMoreOpen(false);
+    // Optionally fetch existing profile to prefill:
+    try {
+      const res = await apiClient.get("/profile"); // relies on backend /profile GET returning current profile
+      setProfileForm({
+        name: res.data?.name || "",
+        about: res.data?.about || "",
+        avatar_url: res.data?.avatar_url || "",
+      });
+    } catch {
+      setProfileForm({ name: "", about: "", avatar_url: "" });
+    }
+    setProfileOpen(true);
+  };
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    try {
+      // Try update first
+      const data = await updateProfile(profileForm);
+      // Optional: show toast and close
+      setProfileOpen(false);
+    } catch (err) {
+      const status = err?.response?.status;
+      if (status === 404) {
+        // No profile exists; create it
+        const data = await createProfile(profileForm);
+        setProfileOpen(false);
+      } else {
+        // surface error toast
+        console.error("Profile save failed", err);
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const ProfileSheet = ({ initial }) => {
     const [form, setForm] = useState({
       name: initial.name || "",
@@ -147,11 +205,9 @@ export default function ContactList() {
 
     const onSave = async () => {
       try {
-        const res = await apiClient.put("/profile", form); // update own profile
+        const res = await apiClient.put("/profile", form);
         setProfileUser({ ...initial, ...res.data });
-      } catch {
-        // handled globally
-      }
+      } catch {}
     };
 
     return (
@@ -305,7 +361,7 @@ export default function ContactList() {
               </button>
               {open && (
                 <div
-                  className="absolute right-0 mt-2 w-40 bg-chat-panel border border-chat-surface-alt rounded-md shadow-lg z-20"
+                  className="absolute right-0 mt-2 w-40 bg-chat-panel border border-chat-surface-alt rounded-md shadow-lg z-30"
                   onMouseLeave={() => setOpen(false)}
                 >
                   <button
@@ -368,9 +424,9 @@ export default function ContactList() {
   }
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Top bar: find and search */}
-      <div className="p-3 border-b border-chat-surface-alt bg-chat-panel">
+    <div className="h-full flex flex-col relative">
+      {/* Top bar */}
+      <div className="sticky top-0 z-30 p-3 border-b border-chat-surface-alt bg-chat-panel">
         <div className="flex items-center gap-2">
           <div className="relative">
             <Input
@@ -388,6 +444,7 @@ export default function ContactList() {
           >
             <LocateFixed className="w-4 h-4" />
           </Button>
+
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-chat-text-muted w-4 h-4" />
             <Input
@@ -398,6 +455,7 @@ export default function ContactList() {
               className="pl-10 bg-chat-surface border-chat-surface-alt text-chat-text placeholder-chat-text-muted focus:border-chat-accent"
             />
           </div>
+
           <Button
             onClick={openNewChat}
             className="bg-chat-accent text-white"
@@ -405,6 +463,52 @@ export default function ContactList() {
           >
             <Plus className="w-4 h-4" />
           </Button>
+
+          {/* Overflow menu with Profile + Logout */}
+          <div className="relative">
+            <Button
+              variant="ghost"
+              className="text-chat-text-muted hover:text-chat-text"
+              onClick={() => setMoreOpen((v) => !v)}
+              aria-haspopup="menu"
+              aria-expanded={moreOpen}
+              title="More"
+            >
+              <MoreVertical className="w-5 h-5" />
+            </Button>
+            {moreOpen && (
+              <div
+                className="absolute right-0 mt-2 w-52 bg-chat-panel border border-chat-surface-alt rounded-md shadow-lg z-40"
+                role="menu"
+                onMouseLeave={() => setMoreOpen(false)}
+              >
+                <button
+                  className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-chat-surface"
+                  onClick={handleOpenOwnProfile}
+                >
+                  <UserCircle2 className="w-4 h-4" />
+                  Profile
+                </button>
+                <button
+                  className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-chat-surface"
+                  onClick={() => {
+                    setMoreOpen(false);
+                    openNewChat();
+                  }}
+                >
+                  <Plus className="w-4 h-4" />
+                  New chat
+                </button>
+                <button
+                  className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-chat-surface"
+                  onClick={onLogout}
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -421,13 +525,6 @@ export default function ContactList() {
             <p className="text-chat-text-muted text-sm mb-4">
               Start a new conversation to see chats here
             </p>
-            <Button
-              onClick={openNewChat}
-              className="bg-chat-accent hover:bg-green-600 text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              New Chat
-            </Button>
           </div>
         ) : (
           <AnimatePresence>
@@ -440,7 +537,7 @@ export default function ContactList() {
 
       {/* New Chat Dialog */}
       {isNewChatOpen && (
-        <div className="absolute inset-0 z-40 flex items-center justify-center">
+        <div className="absolute inset-0 z-50 flex items-center justify-center">
           <div
             className="absolute inset-0 bg-black/50"
             onClick={() => setIsNewChatOpen(false)}
@@ -469,8 +566,108 @@ export default function ContactList() {
         </div>
       )}
 
-      {/* Profile Sheet (view/update) */}
+      {/* Profile Sheet (view/update from search) */}
       {profileUser && <ProfileSheet initial={profileUser} />}
+
+      {/* NEW: Own Profile Editor Sheet opened from three-dots menu */}
+      {profileOpen && (
+        <div className="absolute inset-0 z-50">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setProfileOpen(false)}
+          />
+          <div className="absolute right-0 top-0 h-full w-full sm:w-[420px] bg-chat-panel border-l border-chat-surface-alt p-4 overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold">Edit Profile</h3>
+              <button
+                className="text-chat-text-muted hover:text-chat-text"
+                onClick={() => setProfileOpen(false)}
+                aria-label="Close"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div className="w-16 h-16 rounded-full overflow-hidden bg-green-600 flex items-center justify-center text-white text-xl font-bold">
+                {profileForm.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={profileForm.avatar_url}
+                    alt="avatar"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  (user?.email?.slice(0, 2) || "??").toUpperCase()
+                )}
+              </div>
+
+              <div>
+                <p className="text-sm text-chat-text-muted mb-1">Name</p>
+                <input
+                  className="w-full bg-chat-surface border border-chat-surface-alt rounded px-3 py-2 outline-none focus:border-chat-accent"
+                  value={profileForm.name}
+                  onChange={(e) =>
+                    setProfileForm((f) => ({ ...f, name: e.target.value }))
+                  }
+                />
+              </div>
+
+              <div>
+                <p className="text-sm text-chat-text-muted mb-1">About</p>
+                <textarea
+                  className="w-full bg-chat-surface border border-chat-surface-alt rounded px-3 py-2 outline-none focus:border-chat-accent"
+                  value={profileForm.about}
+                  onChange={(e) =>
+                    setProfileForm((f) => ({ ...f, about: e.target.value }))
+                  }
+                />
+              </div>
+
+              <div>
+                <p className="text-sm text-chat-text-muted mb-1">Avatar URL</p>
+                <input
+                  className="w-full bg-chat-surface border border-chat-surface-alt rounded px-3 py-2 outline-none focus:border-chat-accent"
+                  placeholder="https://example.com/new.jpg"
+                  value={profileForm.avatar_url}
+                  onChange={(e) =>
+                    setProfileForm((f) => ({
+                      ...f,
+                      avatar_url: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2">
+                <Button variant="ghost" onClick={() => setProfileOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-chat-accent text-white"
+                  onClick={handleSaveProfile}
+                  disabled={saving}
+                >
+                  {saving ? "Saving..." : "Save"}
+                </Button>
+              </div>
+
+              {/* Example response shape (for reference) */}
+              {/* {
+                   "user_email": "reciever@gmail.com",
+                   "display_name": null,
+                   "about": "Updated about info",
+                   "avatar_url": "https://example.com/new.jpg",
+                   "avatar_url": "https://example.com/new.jpg",
+                   "name": "New Name",
+                   "status": null,
+                   "updated_at": "2025-09-06T20:40:40.410Z"
+                 } */}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
