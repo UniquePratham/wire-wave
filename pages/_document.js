@@ -6,40 +6,7 @@ export default function Document() {
       <Head>
         <title>WireWave | New Era Of Chatting</title>
         {/* Meta tags */}
-        <meta charSet="utf-8" />
-        <meta
-          name="description"
-          content="ChatPulse - Premium WhatsApp-style messaging application with real-time chat, secure authentication, and beautiful UI."
-        />
-        <meta
-          name="keywords"
-          content="chat, messaging, whatsapp, real-time, websocket, nextjs, react"
-        />
-        <meta name="author" content="ChatPulse Team" />
-        <meta name="robots" content="index, follow" />
-
-        {/* Open Graph / Facebook */}
-        <meta property="og:type" content="website" />
-        <meta
-          property="og:title"
-          content="ChatPulse - Premium Messaging App"
-        />
-        <meta
-          property="og:description"
-          content="Experience seamless real-time messaging with ChatPulse's WhatsApp-style interface."
-        />
-        <meta property="og:site_name" content="ChatPulse" />
-
-        {/* Twitter */}
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta
-          property="twitter:title"
-          content="ChatPulse - Premium Messaging App"
-        />
-        <meta
-          property="twitter:description"
-          content="Experience seamless real-time messaging with ChatPulse's WhatsApp-style interface."
-        />
+      
 
         {/* Favicons */}
         <link rel="icon" type="image/png" href="/images/only_hd_logo.png"></link>
@@ -63,7 +30,7 @@ export default function Document() {
         <link rel="manifest" href="/site.webmanifest" />
 
         {/* Preload custom font (make sure /public/fonts/inter.woff2 exists) */}
-        <link
+       <link
           rel="preload"
           href="/fonts/inter.woff2"
           as="font"
@@ -81,6 +48,40 @@ export default function Document() {
           content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
         />
       </Head>
+        <meta charSet="utf-8" />
+        <meta
+          name="description"
+          content="WireWave - Premium WhatsApp-style messaging application with real-time chat, secure authentication, and beautiful UI."
+        />
+        <meta
+          name="keywords"
+          content="chat, messaging, whatsapp, real-time, websocket, nextjs, react"
+        />
+        <meta name="author" content="WireWave Team" />
+        <meta name="robots" content="index, follow" />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:title"
+          content="WireWave - Premium Messaging App"
+        />
+        <meta
+          property="og:description"
+          content="Experience seamless real-time messaging with WireWave's WhatsApp-style interface."
+        />
+        <meta property="og:site_name" content="WireWave" />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta
+          property="twitter:title"
+          content="WireWave - Premium Messaging App"
+        />
+        <meta
+          property="twitter:description"
+          content="Experience seamless real-time messaging with WireWave's WhatsApp-style interface."
+        />
       <body className="bg-chat-bg text-chat-text antialiased">
         <Main />
         <NextScript />
@@ -105,7 +106,7 @@ export default function Document() {
             }}
           >
             <h1>JavaScript Required</h1>
-            <p>ChatPulse requires JavaScript to function properly.</p>
+            <p>WireWave requires JavaScript to function properly.</p>
             <p>Please enable JavaScript in your browser settings.</p>
           </div>
         </noscript>

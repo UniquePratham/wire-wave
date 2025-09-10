@@ -27,7 +27,7 @@ export default function ProtectedRoute({ children }) {
     return (
        <div className="h-screen bg-chat-bg flex flex-col gap-4 items-center justify-center">
                   <div className="flex justify-center items-center gap-2 flex-col text-center space-y-4">
-                     <Image src="/images/only_hd_logo.png" alt="Wire Wave Logo" width={64} height={64} />
+                     <Image src="/images/only_hd_logo.png" alt="Wire Wave Logo" width={64} height={64} priority />
                     <h1 className="text-2xl font-brand font-bold text-chat-text">WireWave</h1>
                   </div>
                   <div className="text-center space-y-4">

@@ -3,9 +3,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter.woff2") format("woff2");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 html, body {
   height: 100%;
   overflow: hidden; /* stop scrollbars globally */
+  font-family: "Inter", sans-serif;
 }
 
 
@@ -63,10 +72,6 @@ html, body {
   body {
     @apply bg-chat-bg text-chat-text font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
-  }
-  
-  html {
-    scroll-behavior: smooth;
   }
 
   /* Custom scrollbar for chat */

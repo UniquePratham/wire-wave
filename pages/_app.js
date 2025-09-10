@@ -2,14 +2,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
 import '../styles/globals.css';
 import { initializeAuth } from '../lib/auth';
 import { useAuthStore } from '../lib/store';
-import socketManager from '../lib/socket';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -72,20 +70,6 @@ function WireWaveApp({ Component, pageProps, router }) {
     init();
   }, []);
 
-  // Handle socket connection based on auth state
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      socketManager.connect();
-    } else {
-      socketManager.disconnect();
-    }
-
-    // Cleanup on unmount
-    return () => {
-      socketManager.disconnect();
-    };
-  }, [isAuthenticated, user]);
-
   // Request notification permission
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
@@ -100,7 +84,7 @@ function WireWaveApp({ Component, pageProps, router }) {
     return (
       <div className="h-screen bg-chat-bg flex flex-col gap-4 items-center justify-center">
         <div className="flex justify-center items-center gap-2 flex-col text-center space-y-4">
-           <Image src="/images/only_hd_logo.png" alt="Wire Wave Logo" width={64} height={64} />
+           <Image src="/images/only_hd_logo.png" alt="Wire Wave Logo" width={64} height={64} priority />
           <h1 className="text-2xl font-brand font-bold text-chat-text">WireWave</h1>
         </div>
         <div className="text-center space-y-4">

@@ -43,7 +43,7 @@ export default function ProfilePage() {
             className="text-center"
           >
             <h1 className="text-3xl font-brand font-bold text-chat-text mb-2">Profile</h1>
-            <p className="text-chat-text-muted">Manage your ChatPulse account</p>
+            <p className="text-chat-text-muted">Manage your WireWave account</p>
           </motion.div>
 
           {/* Profile Card */}

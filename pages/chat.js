@@ -21,11 +21,6 @@ export default function ChatPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, [setMobileMenuOpen]);
 
-  const handleLogout = async () => {
-    await logoutUser();
-    localStorage.removeItem("chatpulse_user");
-  };
-
   return (
     <ProtectedRoute>
       <div className="h-screen w-screen overflow-hidden bg-chat-bg text-chat-text">
