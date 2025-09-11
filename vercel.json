@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "http://65.20.91.194:3000/:path*"
+      "destination": "https://wirewaveapi.onrender.com/:path*"
     }
   ]
 }
