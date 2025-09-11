@@ -7,7 +7,6 @@ import ContactList from "../components/ContactList";
 import ChatWindow from "../components/ChatWindow";
 import { useUIStore } from "../lib/store";
 import { Button } from "../src/components/ui/button";
-import { logoutUser } from "../lib/auth";
 
 export default function ChatPage() {
   const { isMobileMenuOpen, setMobileMenuOpen } = useUIStore();
@@ -80,7 +79,6 @@ export default function ChatPage() {
                 <div className="flex-1 min-h-0 overflow-y-auto">
                   <ContactList />
                 </div>
-                {/* Removed bottom Logout button; use the three-dot menu in ContactList */}
               </motion.aside>
             </>
           )}

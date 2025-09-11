@@ -152,3 +152,19 @@ html, body {
     @apply bg-chat-surface border border-chat-surface-alt text-chat-text placeholder-chat-text-muted rounded-lg px-3 py-2 focus-ring;
   }
 }
+
+/* globals.css or your main CSS */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.4s ease-out forwards;
+}

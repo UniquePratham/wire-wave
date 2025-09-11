@@ -26,12 +26,16 @@ export default function MessageBubble({ message, isOwn, onReply, onDelete }) {
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
-      {/* hover toolbar */}
-      {hover && (
+      {/* hover toolbar (rendered inside bubble and placed above the message to avoid horizontal overflow) */}
+
+      <div
+        className={`message-bubble ${
+          isOwn ? "message-bubble-sent" : "message-bubble-received"
+        } max-w-xs lg:max-w-md relative`}
+      >
+        {/* toolbar inside bubble, positioned at the top center on larger screens, top-right on small screens */}
         <div
-          className={`absolute ${
-            isOwn ? "-left-28" : "-right-28"
-          } top-1/2 -translate-y-1/2 z-10 flex gap-2 bg-chat-panel border border-chat-surface-alt rounded-md px-2 py-1 shadow`}
+          className={`absolute -top-9 left-1/2 -translate-x-1/2 hidden group-hover:flex items-center gap-2 bg-chat-panel border border-chat-surface-alt rounded-md px-2 py-1 shadow z-20 max-w-[90%] md:max-w-max`}
         >
           <button
             className="text-chat-text-muted hover:text-chat-text flex items-center gap-1"
@@ -56,13 +60,6 @@ export default function MessageBubble({ message, isOwn, onReply, onDelete }) {
             <span className="text-xs">Delete</span>
           </button>
         </div>
-      )}
-
-      <div
-        className={`message-bubble ${
-          isOwn ? "message-bubble-sent" : "message-bubble-received"
-        } max-w-xs lg:max-w-md`}
-      >
         {/* Optional quoted parent (if message has quote info in future) */}
 
         {/* Content */}

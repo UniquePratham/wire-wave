@@ -1,6 +1,5 @@
 // components/ContactList.jsx
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef, memo } from "react";
 import {
   Search,
   Plus,
@@ -20,8 +19,133 @@ import { Input } from "../src/components/ui/input";
 import { Button } from "../src/components/ui/button";
 import { Badge } from "../src/components/ui/badge";
 import { logoutUser } from "../lib/auth";
-import Image from "next/image";
 import { createProfile, updateProfile, searchProfile, selfProfile } from "../lib/profile";
+
+// Move ContactRow out of the component to avoid recreating the component type
+// on every render of ContactList. Defining it inside the component caused
+// React to unmount/remount rows when parent state (like activeContactEmail)
+// changed which retriggered the entry animation repeatedly.
+const ContactRow = memo(({ contact, index, mounted, activeContactEmail, setActiveContact, openProfile, clearChat }) => {
+  const isActive = activeContactEmail === contact.email;
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div
+      className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-chat-surface transition
+    ${isActive ? "bg-chat-surface-alt border-r-2 border-chat-accent" : ""}
+    ${mounted ? "animate-slideIn" : ""}`}
+      style={{ animationDelay: mounted ? `${index * 0.05}s` : "0s" }}
+      onClick={() => setActiveContact(contact.email)}
+    >
+
+      {/* Avatar button */}
+      <div className="relative">
+        <button
+          className="w-12 h-12 rounded-full overflow-hidden bg-green-600 flex items-center justify-center text-white font-medium"
+          onClick={(e) => {
+            e.stopPropagation(); // prevent switching chat
+            openProfile(contact.email);
+          }}
+        >
+          {contact.avatar_url ? (
+            <img
+              src={contact.avatar_url}
+              alt="avatar"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            (contact.name?.slice(0, 2) ||
+              contact.email?.slice(0, 2) ||
+              "??"
+            ).toUpperCase()
+          )}
+        </button>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-1">
+          {/* Name button */}
+          <button
+            className="font-medium text-chat-text truncate text-left hover:underline"
+            onClick={(e) => {
+              e.stopPropagation(); // prevent switching chat
+              openProfile(contact.email);
+            }}
+            title={contact.email}
+          >
+            {contact.name ? contact.name : contact.email}
+          </button>
+
+          <span className="text-xs text-chat-text-muted">
+            {contact.lastMessageTime &&
+              new Date(contact.lastMessageTime).toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              })}
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <p>
+            {typeof contact.lastMessage === "string"
+              ? contact.lastMessage
+              : contact.lastMessage?.content || "No messages yet"}
+          </p>
+
+          {contact.unreadCount > 0 && (
+            <Badge className="bg-chat-accent text-white text-xs ml-2 min-w-[20px] h-5 flex items-center justify-center">
+              {contact.unreadCount > 99 ? "99+" : contact.unreadCount}
+            </Badge>
+          )}
+
+          {/* Dropdown menu */}
+          <div className="relative ml-2">
+            <button
+              className="p-1 text-chat-text-muted hover:text-chat-text"
+              onClick={(e) => {
+                e.stopPropagation(); // prevent switching chat
+                setOpen((v) => !v);
+              }}
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+
+            {open && (
+              <div className="absolute right-0 mt-2 w-40 bg-chat-panel border border-chat-surface-alt rounded-md shadow-lg z-30">
+                <button className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-chat-surface">
+                  <BellOff className="w-4 h-4" />
+                  Mute (soon)
+                </button>
+                <button
+                  className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-chat-surface"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openProfile(contact.email);
+                  }}
+                >
+                  <User2 className="w-4 h-4" />
+                  View profile
+                </button>
+                <button
+                  className="w-full flex items-center gap-2 px-3 py-2 text-left text-red-400 hover:bg-chat-surface"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    clearChat(contact.email);
+                  }}
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete chat
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
 
 export default function ContactList() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,15 +157,20 @@ export default function ContactList() {
   const [profileForm, setProfileForm] = useState({ user_email: "", name: "", about: "", avatar_url: "" });
   const [saving, setSaving] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isAnimation, setIsAnimation] = useState(false);
-  const [profile, setProfile] = useState({});
-
+  const [isLoading, setIsLoading] = useState(true);
   const user = useAuthStore((s) => s.user);
   const contacts = useChatStore((s) => s.contacts);
   const setContacts = useChatStore((s) => s.setContacts);
   const activeContactEmail = useUIStore((s) => s.activeContactEmail);
   const setActiveContact = useUIStore((s) => s.setActiveContact);
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // run after first paint
+    const timer = setTimeout(() => setMounted(true), 10);
+    return () => clearTimeout(timer);
+  }, []);
 
   // ✅ fetch messages properly
   useEffect(() => {
@@ -111,6 +240,7 @@ export default function ContactList() {
       })
     );
 
+    setIsLoading(false);
     return withProfiles.sort(
       (a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime)
     );
@@ -311,129 +441,7 @@ export default function ContactList() {
       </div>
     );
   };
-const ContactRow = ({ contact, index }) => {
-  const isActive = activeContactEmail === contact.email;
-  const [open, setOpen] = useState(false);
-
-  return (
-    <motion.div
-      key={contact.email}
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.03 }}
-      className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-chat-surface transition ${
-        isActive ? "bg-chat-surface-alt border-r-2 border-chat-accent" : ""
-      }`}
-      onClick={() => setActiveContact(contact.email)}
-    >
-      {/* Avatar button */}
-      <div className="relative">
-        <button
-          className="w-12 h-12 rounded-full overflow-hidden bg-green-600 flex items-center justify-center text-white font-medium"
-          onClick={(e) => {
-            e.stopPropagation(); // prevent switching chat
-            openProfile(contact.email);
-          }}
-        >
-          {contact.avatar_url ? (
-            <img
-              src={contact.avatar_url}
-              alt="avatar"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            (contact.name?.slice(0, 2) ||
-              contact.email?.slice(0, 2) ||
-              "??"
-            ).toUpperCase()
-          )}
-        </button>
-      </div>
-
-      {/* Main content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-1">
-          {/* Name button */}
-          <button
-            className="font-medium text-chat-text truncate text-left hover:underline"
-            onClick={(e) => {
-              e.stopPropagation(); // prevent switching chat
-              openProfile(contact.email);
-            }}
-            title={contact.email}
-          >
-            {contact.name ? contact.name : contact.email}
-          </button>
-
-          <span className="text-xs text-chat-text-muted">
-            {contact.lastMessageTime &&
-              new Date(contact.lastMessageTime).toLocaleTimeString("en-US", {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false,
-              })}
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <p>
-            {typeof contact.lastMessage === "string"
-              ? contact.lastMessage
-              : contact.lastMessage?.content || "No messages yet"}
-          </p>
-
-          {contact.unreadCount > 0 && (
-            <Badge className="bg-chat-accent text-white text-xs ml-2 min-w-[20px] h-5 flex items-center justify-center">
-              {contact.unreadCount > 99 ? "99+" : contact.unreadCount}
-            </Badge>
-          )}
-
-          {/* Dropdown menu */}
-          <div className="relative ml-2">
-            <button
-              className="p-1 text-chat-text-muted hover:text-chat-text"
-              onClick={(e) => {
-                e.stopPropagation(); // prevent switching chat
-                setOpen((v) => !v);
-              }}
-            >
-              <MoreVertical className="w-4 h-4" />
-            </button>
-
-            {open && (
-              <div className="absolute right-0 mt-2 w-40 bg-chat-panel border border-chat-surface-alt rounded-md shadow-lg z-30">
-                <button className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-chat-surface">
-                  <BellOff className="w-4 h-4" />
-                  Mute (soon)
-                </button>
-                <button
-                  className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-chat-surface"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openProfile(contact.email);
-                  }}
-                >
-                  <User2 className="w-4 h-4" />
-                  View profile
-                </button>
-                <button
-                  className="w-full flex items-center gap-2 px-3 py-2 text-left text-red-400 hover:bg-chat-surface"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    clearChat(contact.email);
-                  }}
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Delete chat
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
+  // ...existing code... (inner ContactRow removed - using top-level memoized ContactRow)
 
 
   if (isLoading) {
@@ -548,11 +556,18 @@ const ContactRow = ({ contact, index }) => {
             </p>
           </div>
         ) : (
-          <AnimatePresence>
-            {contacts.map((c, i) => (
-              <ContactRow key={c.email} contact={c} index={i} />
-            ))}
-          </AnimatePresence>
+          contacts.map((c, i) => (
+            <ContactRow
+              key={c.email}
+              contact={c}
+              index={i}
+              mounted={mounted}
+              activeContactEmail={activeContactEmail}
+              setActiveContact={setActiveContact}
+              openProfile={openProfile}
+              clearChat={clearChat}
+            />
+          ))
         )}
       </div>
 
