@@ -8,6 +8,8 @@ import {
   User2,
   Trash2,
   BellOff,
+  Copy,
+  X,
   LocateFixed,
   LogOut,
   UserX,
@@ -25,9 +27,14 @@ import { createProfile, updateProfile, searchProfile, selfProfile } from "../lib
 // on every render of ContactList. Defining it inside the component caused
 // React to unmount/remount rows when parent state (like activeContactEmail)
 // changed which retriggered the entry animation repeatedly.
-const ContactRow = memo(({ contact, index, mounted, activeContactEmail, setActiveContact, openProfile, clearChat }) => {
+const ContactRow = memo(({ contact, index, mounted, activeContactEmail, setActiveContact, openProfile, clearChat, onOpenContext }) => {
   const isActive = activeContactEmail === contact.email;
-  const [open, setOpen] = useState(false);
+
+  const handleContext = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onOpenContext && onOpenContext(contact, e.clientX, e.clientY);
+  };
 
   return (
     <div
@@ -36,6 +43,7 @@ const ContactRow = memo(({ contact, index, mounted, activeContactEmail, setActiv
     ${mounted ? "animate-slideIn" : ""}`}
       style={{ animationDelay: mounted ? `${index * 0.05}s` : "0s" }}
       onClick={() => setActiveContact(contact.email)}
+      onContextMenu={handleContext}
     >
 
       {/* Avatar button */}
@@ -100,47 +108,7 @@ const ContactRow = memo(({ contact, index, mounted, activeContactEmail, setActiv
             </Badge>
           )}
 
-          {/* Dropdown menu */}
-          <div className="relative ml-2">
-            <button
-              className="p-1 text-chat-text-muted hover:text-chat-text"
-              onClick={(e) => {
-                e.stopPropagation(); // prevent switching chat
-                setOpen((v) => !v);
-              }}
-            >
-              <MoreVertical className="w-4 h-4" />
-            </button>
-
-            {open && (
-              <div className="absolute right-0 mt-2 w-40 bg-chat-panel border border-chat-surface-alt rounded-md shadow-lg z-30">
-                <button className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-chat-surface">
-                  <BellOff className="w-4 h-4" />
-                  Mute (soon)
-                </button>
-                <button
-                  className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-chat-surface"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openProfile(contact.email);
-                  }}
-                >
-                  <User2 className="w-4 h-4" />
-                  View profile
-                </button>
-                <button
-                  className="w-full flex items-center gap-2 px-3 py-2 text-left text-red-400 hover:bg-chat-surface"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    clearChat(contact.email);
-                  }}
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Delete chat
-                </button>
-              </div>
-            )}
-          </div>
+          {/* context menu now rendered centrally in ContactList */}
         </div>
       </div>
     </div>
@@ -166,6 +134,33 @@ export default function ContactList() {
 
   const [mounted, setMounted] = useState(false);
 
+  // Centralized context menu state to avoid multiple menus stacking
+  const [contextMenu, setContextMenu] = useState({ open: false, x: 0, y: 0, contact: null });
+
+  useEffect(() => {
+    if (!contextMenu.open) return;
+    const onDoc = (e) => {
+      if (e.type === 'keydown' && e.key === 'Escape') return setContextMenu({ open: false, x: 0, y: 0, contact: null });
+      // close when clicking outside
+      setContextMenu((cur) => cur.open ? { open: false, x: 0, y: 0, contact: null } : cur);
+    };
+    document.addEventListener('click', onDoc);
+    document.addEventListener('contextmenu', onDoc);
+    document.addEventListener('keydown', onDoc);
+    return () => {
+      document.removeEventListener('click', onDoc);
+      document.removeEventListener('contextmenu', onDoc);
+      document.removeEventListener('keydown', onDoc);
+    };
+  }, [contextMenu.open]);
+
+  // Prevent native context menu globally (we provide our own on rows)
+  useEffect(() => {
+    const handler = (e) => e.preventDefault();
+    document.addEventListener('contextmenu', handler);
+    return () => document.removeEventListener('contextmenu', handler);
+  }, []);
+
   useEffect(() => {
     // run after first paint
     const timer = setTimeout(() => setMounted(true), 10);
@@ -176,7 +171,14 @@ export default function ContactList() {
   useEffect(() => {
     let mounted = true;
     const load = async () => {
-      if (!user) return;
+      if (!user) {
+        // not authenticated - stop loading state
+        setIsLoading(false);
+        return;
+      }
+
+      // start loading when we have a user and begin fetching
+      setIsLoading(true);
       try {
         const msgs = await fetchMessages(); // <- call it
         if (!mounted) return;
@@ -186,9 +188,13 @@ export default function ContactList() {
         } else {
           // if there are no messages, ensure contacts are empty or preserved
           setContacts([]);
+          // stop showing the loading skeleton when there are no messages
+          setIsLoading(false);
         }
       } catch (err) {
-        // ignore or add a toast
+        // stop loading on error
+        console.error('Failed to load messages', err);
+        setIsLoading(false);
       }
     };
     load();
@@ -285,7 +291,7 @@ export default function ContactList() {
       // reload messages after clear
       clearAllMessages(email);
       const msgs = await fetchMessages();
-      const mapped = buildContacts(msgs, user);
+      const mapped = await buildContacts(msgs, user);
       setContacts(mapped);
     } catch (err) {
       console.error("Failed to clear chat:", err);
@@ -566,8 +572,31 @@ export default function ContactList() {
               setActiveContact={setActiveContact}
               openProfile={openProfile}
               clearChat={clearChat}
+              onOpenContext={(contact, x, y) => setContextMenu({ open: true, x, y, contact })}
             />
           ))
+        )}
+
+        {/* centralized context menu */}
+        {contextMenu.open && contextMenu.contact && (
+          <div className="fixed z-50" style={{ left: contextMenu.x, top: contextMenu.y, minWidth: 180 }}>
+            <div className="bg-chat-panel border border-chat-surface-alt rounded-md shadow-lg">
+              <button className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-chat-surface" onClick={(e) => { e.stopPropagation(); openProfile(contextMenu.contact.email); setContextMenu({ open: false, x: 0, y: 0, contact: null }); }}>
+                <User2 className="w-4 h-4" /> View profile
+              </button>
+              <button className="w-full flex items-center gap-2 px-3 py-2 text-left  hover:bg-chat-surface" onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(contextMenu.contact.email); setContextMenu({ open: false, x: 0, y: 0, contact: null }); }}>
+                <Copy className="w-4 h-4" /> Copy email
+              </button>
+              <button className="w-full flex items-center gap-2 px-3 py-2 text-left text-red-400 hover:bg-chat-surface" onClick={(e) => { e.stopPropagation(); clearChat(contextMenu.contact.email); setContextMenu({ open: false, x: 0, y: 0, contact: null }); }}>
+                <Trash2 className="w-4 h-4" /> Delete chat
+              </button>
+              {contextMenu.contact.email === activeContactEmail && (
+                <button className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-chat-surface" onClick={(e) => { e.stopPropagation(); setActiveContact(null); setContextMenu({ open: false, x: 0, y: 0, contact: null }); }}>
+                  <X className="w-4 h-4" /> Close chat
+                </button>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
