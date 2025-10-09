@@ -49,7 +49,7 @@ const ContactRow = memo(({ contact, index, mounted, activeContactEmail, setActiv
       {/* Avatar button */}
       <div className="relative">
         <button
-          className="w-12 h-12 rounded-full overflow-hidden bg-green-600 flex items-center justify-center text-white font-medium"
+          className="w-12 h-12 rounded-full overflow-hidden bg-chat-accent flex items-center justify-center text-white font-medium"
           onClick={(e) => {
             e.stopPropagation(); // prevent switching chat
             openProfile(contact.email);
@@ -366,13 +366,13 @@ export default function ContactList() {
           </h3>
 
           {initial.error ? (
-            <div className="flex justify-left items-center gap-2 text-red-500">
-              <UserX className="w-6 h-6 text-red-500" />
-              <p className="text-red-400">{initial.error}</p>
+            <div className="flex justify-left items-center gap-2 text-chat-error">
+              <UserX className="w-6 h-6 text-chat-error" />
+              <p className="text-chat-error">{initial.error}</p>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-green-600 flex items-center justify-center text-white text-2xl font-bold mx-auto shadow-md">
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-chat-accent flex items-center justify-center text-white text-2xl font-bold mx-auto shadow-md">
                 {form.avatar_url ? (
                   <img src={form.avatar_url} alt="avatar" className="w-full h-full object-cover" />
                 ) : (
@@ -587,7 +587,7 @@ export default function ContactList() {
               <button className="w-full flex items-center gap-2 px-3 py-2 text-left  hover:bg-chat-surface" onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(contextMenu.contact.email); setContextMenu({ open: false, x: 0, y: 0, contact: null }); }}>
                 <Copy className="w-4 h-4" /> Copy email
               </button>
-              <button className="w-full flex items-center gap-2 px-3 py-2 text-left text-red-400 hover:bg-chat-surface" onClick={(e) => { e.stopPropagation(); clearChat(contextMenu.contact.email); setContextMenu({ open: false, x: 0, y: 0, contact: null }); }}>
+              <button className="w-full flex items-center gap-2 px-3 py-2 text-left text-chat-error hover:bg-chat-surface" onClick={(e) => { e.stopPropagation(); clearChat(contextMenu.contact.email); setContextMenu({ open: false, x: 0, y: 0, contact: null }); }}>
                 <Trash2 className="w-4 h-4" /> Delete chat
               </button>
               {contextMenu.contact.email === activeContactEmail && (

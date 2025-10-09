@@ -68,10 +68,10 @@ export default function LoginPage() {
       }
       console.error('Login error:', error);
     } finally {
-        setTimeout(() => {
-          console.log("after 5 seconds");
-          setLoginError('');
-        }, 5000); // Clear error after 5 seconds
+      setTimeout(() => {
+        console.log("after 5 seconds");
+        setLoginError('');
+      }, 5000); // Clear error after 5 seconds
       setIsLoading(false);
     }
   };
@@ -79,20 +79,20 @@ export default function LoginPage() {
   if (isAuthenticated) {
     return (
       <div className="h-screen bg-chat-bg flex flex-col gap-4 items-center justify-center">
-             <div className="flex justify-center items-center gap-2 flex-col text-center space-y-4">
-                <Image src="/images/only_hd_logo.png" alt="Wire Wave Logo" width={64} height={64} priority />
-               <h1 className="text-2xl font-brand font-bold text-chat-text">WireWave</h1>
-             </div>
-             <div className="text-center space-y-4">
-               <p className="text-chat-text-muted">Redirecting to chat...</p>
-               <div className="w-16 h-16 border-4 border-chat-accent border-t-transparent rounded-full animate-spin mx-auto"></div>
-             </div>
-           </div>
+        <div className="flex justify-center items-center gap-2 flex-col text-center space-y-4">
+          <Image src="/images/only_hd_logo.png" alt="Wire Wave Logo" width={64} height={64} priority />
+          <h1 className="text-2xl font-brand font-bold text-chat-text">WireWave</h1>
+        </div>
+        <div className="text-center space-y-4">
+          <p className="text-chat-text-muted">Redirecting to chat...</p>
+          <div className="w-16 h-16 border-4 border-chat-accent border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+      </div>
     );
   }
 
   return (
-     <div className="h-screen bg-chat-bg flex items-center justify-center p-4 overflow-hidden">
+    <div className="h-screen bg-chat-bg flex items-center justify-center p-4 overflow-hidden">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -109,7 +109,7 @@ export default function LoginPage() {
             >
               <Image src="/images/only_hd_logo.png" alt="Wire Wave Logo" width={64} height={64} priority />
             </motion.div>
-            
+
             <div>
               <CardTitle className="text-2xl font-brand font-bold text-chat-text flex items-center justify-center gap-5">
                 <Send className="w-6 h-6 text-chat-text-muted" />
@@ -174,7 +174,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-green-700 hover:bg-chat-accent text-white font-medium py-2 px-4 rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-chat-accent hover:bg-keppel text-white font-medium py-2 px-4 rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center space-x-2">
@@ -190,9 +190,9 @@ export default function LoginPage() {
             <div className="mt-6 text-center">
               <p className="text-chat-text-muted text-sm">
                 Don't have an account?{' '}
-                <Link 
-                  href="/register" 
-                  className="text-chat-accent hover:text-green-400 font-medium transition-colors"
+                <Link
+                  href="/register"
+                  className="text-chat-accent hover:text-scooter font-medium transition-colors"
                 >
                   Sign up
                 </Link>

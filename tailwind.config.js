@@ -18,17 +18,27 @@ module.exports = {
     },
     extend: {
       colors: {
-        // ChatPulse WhatsApp-style theme
-        'chat-bg': '#0B141A',
-        'chat-panel': '#111B21',
-        'chat-surface': '#1F2C34',
-        'chat-surface-alt': '#202C33',
-        'chat-accent': '#25D366',
-        'chat-secondary': '#34B7F1',
-        'chat-text': '#E9EDF0',
-        'chat-text-muted': '#9AA5AE',
-        'chat-success': '#22C55E',
-        'chat-error': '#EF4444',
+        // New custom color scheme
+        'dodger-blue': '#3b7afc',
+        'indigo': '#426dc4',
+        'keppel': '#37b99b',
+        'big-stone': '#121e2e',
+        'eden': '#0d5c45',
+        'periwinkle-gray': '#c8d5e6',
+        'shuttle-gray': '#5a6e7b',
+        'downriver': '#0f265b',
+        'scooter': '#2aabc5',
+        // Chat theme using new colors
+        'chat-bg': '#121e2e', // big-stone
+        'chat-panel': '#0f265b', // downriver
+        'chat-surface': '#5a6e7b', // shuttle-gray
+        'chat-surface-alt': '#426dc4', // indigo
+        'chat-accent': '#37b99b', // keppel
+        'chat-secondary': '#2aabc5', // scooter
+        'chat-text': '#c8d5e6', // periwinkle-gray
+        'chat-text-muted': '#5a6e7b', // shuttle-gray
+        'chat-success': '#37b99b', // keppel
+        'chat-error': '#3b7afc', // dodger-blue
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

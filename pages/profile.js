@@ -108,7 +108,7 @@ export default function ProfilePage() {
                   <Button
                     onClick={handleLogout}
                     disabled={isLoggingOut}
-                    className="w-full justify-start bg-chat-error hover:bg-red-600 text-white"
+                    className="w-full justify-start bg-chat-error hover:bg-dodger-blue text-white"
                   >
                     {isLoggingOut ? (
                       <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

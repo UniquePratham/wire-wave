@@ -463,7 +463,7 @@ export default function ChatWindow() {
           {showMenu && (
             <div className="absolute right-0 mt-10 w-40 bg-chat-panel border border-chat-surface-alt rounded-md shadow-lg z-50">
               <button
-                className="w-full flex items-center gap-2 px-3 py-2 text-left text-red-400 hover:bg-chat-surface"
+                className="w-full flex items-center gap-2 px-3 py-2 text-left text-chat-error hover:bg-chat-surface"
                 onClick={() => clearChat(activeContactEmail)}
               >
                 <Trash2 className="w-4 h-4" /> Delete chat
@@ -501,7 +501,7 @@ export default function ChatWindow() {
         ))}
         {isContactTyping && (
           <div className="flex items-center space-x-2 px-3 py-2">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium bg-green-600">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium bg-chat-accent">
               {activeContactEmail?.slice(0, 2).toUpperCase()}
             </div>
             <div className="bg-chat-surface rounded-chat px-3 py-2">
@@ -541,7 +541,7 @@ export default function ChatWindow() {
         ))}
         {isContactTyping && (
           <div className="flex items-center space-x-2 px-3 py-2">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium bg-green-600">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium bg-chat-accent">
               {activeContactEmail?.slice(0, 2).toUpperCase()}
             </div>
             <div className="bg-chat-surface rounded-chat px-3 py-2">
